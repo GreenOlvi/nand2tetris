@@ -13,7 +13,7 @@ use Data::Dumper;
 my $parser = Parser->new({ filename => $ARGV[0] });
 
 while ($parser->advance) {
-   say $parser->{current};
+   say $parser->{current}, ' -> ', $parser->commandType;
 }
 
 exit 0;
