@@ -12,8 +12,8 @@ use Data::Dumper;
 
 my $parser = Parser->new({ filename => $ARGV[0] });
 
-while ($parser->advance) {
-   say $parser->{current}, ' -> ', $parser->commandType;
+while (my $cmd = $parser->advance) {
+   say Dumper $cmd;
 }
 
 exit 0;
