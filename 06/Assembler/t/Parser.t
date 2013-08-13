@@ -5,7 +5,7 @@ use Test::More tests => 3;
 
 use Parser;
 
-my $parser = Parser->new({ filename => '..\add\add.asm' });
+my $parser = Parser->new({ filename => '../add/Add.asm' });
 
 my $types = {
    $Parser::A_COMMAND => 'A command',
@@ -60,7 +60,7 @@ subtest 'dest' => sub {
          ['@1', undef], ['@som.e_varia:ble_na$me123', undef],
       ],
       $typeval->{c} => [
-         ['0', ''], ['D=M', 'D'], ['M;JEQ', ''], ['AMD=0', 'AMD'], ['M=!D'], ['A=D&A'],
+         ['0', ''], ['D=M', 'D'], ['M;JEQ', ''], ['AMD=0', 'AMD'], ['M=!D', 'M'], ['A=D&A', 'A'],
       ],
       $typeval->{l} => [
          ['(label)', undef], ['(other_label222)', undef],
