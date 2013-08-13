@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 3;
+use Test::More tests => 4;
 
 use Parser;
 
@@ -71,6 +71,27 @@ subtest 'dest' => sub {
       foreach my $t (@{$tests->{$type}}) {
          is $parser->dest($type, $t->[0]), $t->[1],
             sprintf "Dest from '%s' is %s", $t->[0], defined $t->[1] ? "'$t->[1]'" : 'undef';
+      }
+   }
+};
+
+subtest 'jump' => sub {
+   my $tests = {
+      $typeval->{a} => [
+         ['@1', undef], ['@som.e_varia:ble_na$me123', undef],
+      ],
+      $typeval->{c} => [
+         ['0', ''], ['D=M', ''], ['M;JEQ', 'JEQ'], ['AMD=0', ''], ['M=!D', ''], ['A=D&A', ''],
+      ],
+      $typeval->{l} => [
+         ['(label)', undef], ['(other_label222)', undef],
+      ],
+   };
+
+   foreach my $type ( @{$typeval}{ qw(a c l) } ) {
+      foreach my $t (@{$tests->{$type}}) {
+         is $parser->jump($type, $t->[0]), $t->[1],
+            sprintf "Jump from '%s' is %s", $t->[0], defined $t->[1] ? "'$t->[1]'" : 'undef';
       }
    }
 };

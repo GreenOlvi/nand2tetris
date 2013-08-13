@@ -139,7 +139,13 @@ sub jump {
    my $type = shift;
    my $cmd  = shift;
 
-   return;
+   return unless $type == $C_COMMAND;
+
+   my ($j) = $cmd =~ m/($is_jump)$/;
+   $j //= '';
+   $j =~ s/^;//;
+
+   return $j;
 }
 
 1;
