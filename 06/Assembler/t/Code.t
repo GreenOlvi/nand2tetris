@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 2;
+use Test::More tests => 3;
 use Test::Deep;
 
 use Code;
@@ -19,6 +19,25 @@ subtest 'dest' => sub {
 
    foreach my $t (@tests) {
       cmp_deeply $code->dest($t->[0]), $t->[1];
+   }
+};
+
+subtest 'comp' => sub {
+   my @tests = (
+      [undef, undef],
+      ['-1'  => [0, 1, 1, 1, 0, 1, 0]],
+      ['M'   => [1, 1, 1, 0, 0, 0, 0]],
+      ['!A'  => [0, 1, 1, 0 ,0 ,0, 1]],
+      ['-D'  => [0, 0, 0, 1, 1, 1, 1]],
+      ['M+1' => [1, 1, 1, 0, 1, 1, 1]],
+      ['D+A' => [0, 0, 0, 0, 0, 1, 0]],
+      ['A-D' => [0, 0, 0, 0, 1, 1, 1]],
+      ['D&M' => [1, 0, 0, 0, 0, 0, 0]],
+      ['D|A' => [0, 0, 1, 0, 1, 0, 1]],
+   );
+
+   foreach my $t (@tests) {
+      cmp_deeply $code->comp($t->[0]), $t->[1];
    }
 };
 
