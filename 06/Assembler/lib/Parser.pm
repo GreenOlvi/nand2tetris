@@ -13,11 +13,11 @@ our $L_COMMAND = 0x4;
 my $is_comment  = qr|//|;
 my $is_const    = qr/\d+/;
 my $is_symbol   = qr/[A-Za-z_\.\$:][A-Za-z0-9_\.\$:]+/;
-my $is_dest     = qr/[ADM]{1,3}=/;
-my $is_comp     = qr/.+/;
-my $is_jump     = qr/;J.{2}/;
+my $is_dest     = qr/([ADM]{1,3})=/;
+my $is_comp     = qr/(.+?)/;
+my $is_jump     = qr/;(J.{2})/;
 my $is_acommand = qr/\@($is_const|$is_symbol)/;
-my $is_ccommand = qr/($is_dest)?($is_comp)($is_jump)?/;
+my $is_ccommand = qr/$is_dest?$is_comp$is_jump?/;
 my $is_lcommand = qr/\(($is_symbol)\)/;
 
 
@@ -119,11 +119,9 @@ sub dest {
 
    return unless $type == $C_COMMAND;
 
-   my ($d) = $cmd =~ m/^$is_ccommand/;
-   $d //= '';
-   $d =~ s/=$//;
+   my ($d, $c, $j) = $cmd =~ m/^$is_ccommand$/;
 
-   return $d;
+   return $d // '';
 }
 
 sub comp {
@@ -131,7 +129,11 @@ sub comp {
    my $type = shift;
    my $cmd = shift;
 
-   return;
+   return unless $type == $C_COMMAND;
+
+   my ($d, $c, $j) = $cmd =~ m/^$is_ccommand$/;
+
+   return $c // '';
 }
 
 sub jump {
@@ -141,11 +143,9 @@ sub jump {
 
    return unless $type == $C_COMMAND;
 
-   my ($j) = $cmd =~ m/($is_jump)$/;
-   $j //= '';
-   $j =~ s/^;//;
+   my ($d, $c, $j) = $cmd =~ m/^$is_ccommand$/;
 
-   return $j;
+   return $j // '';
 }
 
 1;

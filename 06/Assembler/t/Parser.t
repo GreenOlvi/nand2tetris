@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 
 use Parser;
 
@@ -75,13 +75,36 @@ subtest 'dest' => sub {
    }
 };
 
+subtest 'comp' => sub {
+   my $tests = {
+      $typeval->{a} => [
+         ['@1', undef], ['@som.e_varia:ble_na$me123', undef],
+      ],
+      $typeval->{c} => [
+         ['0', '0'], ['D=M', 'M'], ['M;JEQ', 'M'], ['AMD=0', '0'],
+         ['M=!D', '!D'], ['A=D&A', 'D&A'], ['0;JMP', '0'],
+      ],
+      $typeval->{l} => [
+         ['(label)', undef], ['(other_label222)', undef],
+      ],
+   };
+
+   foreach my $type ( @{$typeval}{ qw(a c l) } ) {
+      foreach my $t (@{$tests->{$type}}) {
+         is $parser->comp($type, $t->[0]), $t->[1],
+            sprintf "Comp from '%s' is %s", $t->[0], defined $t->[1] ? "'$t->[1]'" : 'undef';
+      }
+   }
+};
+
 subtest 'jump' => sub {
    my $tests = {
       $typeval->{a} => [
          ['@1', undef], ['@som.e_varia:ble_na$me123', undef],
       ],
       $typeval->{c} => [
-         ['0', ''], ['D=M', ''], ['M;JEQ', 'JEQ'], ['AMD=0', ''], ['M=!D', ''], ['A=D&A', ''],
+         ['0', ''], ['D=M', ''], ['M;JEQ', 'JEQ'], ['AMD=0', ''], ['M=!D', ''],
+         ['A=D&A', ''], ['0;JMP', 'JMP'],
       ],
       $typeval->{l} => [
          ['(label)', undef], ['(other_label222)', undef],
