@@ -21,9 +21,9 @@ my $typeval = {
 
 subtest 'commandType' => sub {
    my $tests = {
-      $typeval->{a} => ['@1', '@som.e_varia:ble_na$me123'],
-      $typeval->{c} => ['0', 'D=M', 'D+A', 'D | M', 'M;JEQ'],
-      $typeval->{l} => ['(label)', '(other_label222)'],
+      $typeval->{a} => ['@1', '@som.e_varia:ble_na$me123', '@a_variable    // declared a'],
+      $typeval->{c} => ['0', 'D=M', 'D+A', 'D | M', 'M;JEQ', 'D=M       // comment'],
+      $typeval->{l} => ['(label)', '(other_label222)', '(exit)     // exit label'],
    };
 
    foreach my $type ( @{$typeval}{ qw(a c l) } ) {

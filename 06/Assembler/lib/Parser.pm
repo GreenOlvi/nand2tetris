@@ -10,15 +10,15 @@ our $A_COMMAND = 0x1;
 our $C_COMMAND = 0x2;
 our $L_COMMAND = 0x4;
 
-my $is_comment  = qr|//|;
+my $is_comment  = qr|\s*(//.*)|;
 my $is_const    = qr/\d+/;
 my $is_symbol   = qr/[A-Za-z_\.\$:][A-Za-z0-9_\.\$:]+/;
 my $is_dest     = qr/([ADM]{1,3})=/;
 my $is_comp     = qr/(.+?)/;
 my $is_jump     = qr/;(J.{2})/;
-my $is_acommand = qr/\@($is_const|$is_symbol)/;
-my $is_ccommand = qr/$is_dest?$is_comp$is_jump?/;
-my $is_lcommand = qr/\(($is_symbol)\)/;
+my $is_acommand = qr/\@($is_const|$is_symbol)$is_comment?/;
+my $is_ccommand = qr/$is_dest?$is_comp$is_jump?$is_comment?/;
+my $is_lcommand = qr/\(($is_symbol)\)$is_comment?/;
 
 
 my $get_symbol = {
@@ -41,7 +41,9 @@ sub new {
    my $class = shift;
    my $args  = shift;
 
-   my $self = {};
+   my $self = {
+      pc => 0,
+   };
 
    if ($args->{filename}) {
       open(my $fh, '<', $args->{filename});
@@ -74,6 +76,8 @@ sub advance {
    my $dest   = $self->dest($type, $cmd);
    my $comp   = $self->comp($type, $cmd);
    my $jump   = $self->jump($type, $cmd);
+
+   $self->{pc}++ if ($type == $A_COMMAND || $type == $C_COMMAND);
 
    return {
       cmd    => $cmd,
