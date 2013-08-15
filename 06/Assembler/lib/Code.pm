@@ -21,6 +21,24 @@ sub dest {
 
 sub comp {}
 
-sub jump {}
+my $jumps = {
+   ''    => [0, 0, 0],
+   'JGT' => [0, 0, 1],
+   'JEQ' => [0, 1, 0],
+   'JGE' => [0, 1, 1],
+   'JLT' => [1, 0, 0],
+   'JNE' => [1, 0, 1],
+   'JLE' => [1, 1, 0],
+   'JMP' => [1, 1, 1],
+};
+
+sub jump {
+   my $self = shift;
+   my $jump = shift;
+
+   return unless defined $jump;
+
+   return $jumps->{$jump};
+}
 
 1;
