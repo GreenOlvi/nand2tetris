@@ -1,7 +1,8 @@
 use strict;
 use warnings;
+use v5.10;
 
-use Test::More tests => 3;
+use Test::More tests => 4;
 use Test::Deep;
 
 use Code;
@@ -56,6 +57,21 @@ subtest 'jump' => sub {
 
    foreach my $t (@tests) {
       cmp_deeply $code->jump($t->[0]), $t->[1];
+   }
+};
+
+subtest 'const' => sub {
+   my @tests = (
+      [''      => undef],
+      ['0'     => [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      ['2'     => [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]],
+      ['200'   => [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0]],
+      ['16006' => [0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0]],
+   );
+
+   foreach my $t (@tests) {
+      say($t->[0]);
+      cmp_deeply $code->const($t->[0]), $t->[1];
    }
 };
 

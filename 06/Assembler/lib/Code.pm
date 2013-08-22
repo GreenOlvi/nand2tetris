@@ -72,4 +72,16 @@ sub jump {
    return $jumps->{$jump};
 }
 
+sub const {
+   my $self = shift;
+   my $val  = shift;
+
+   return unless defined $val;
+   return unless $val =~ m/^\d+$/;
+
+   my @bin = reverse map { (2**$_ & $val) ? 1 : 0  } (0..14);
+
+   return \@bin;
+}
+
 1;
