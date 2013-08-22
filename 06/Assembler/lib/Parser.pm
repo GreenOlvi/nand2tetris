@@ -11,14 +11,31 @@ our $C_COMMAND = 0x2;
 our $L_COMMAND = 0x4;
 
 my $is_comment  = qr|\s*(//.*)|;
-my $is_const    = qr/\d+/;
-my $is_symbol   = qr/[A-Za-z_\.\$:][A-Za-z0-9_\.\$:]+/;
+my $is_const    = qr/(\d+)/;
+my $is_symbol   = qr/([A-Za-z_\.\$:][A-Za-z0-9_\.\$:]+)/;
 my $is_dest     = qr/([ADM]{1,3})=/;
 my $is_comp     = qr/(.+?)/;
 my $is_jump     = qr/;(J.{2})/;
-my $is_acommand = qr/\@($is_const|$is_symbol)$is_comment?/;
-my $is_ccommand = qr/$is_dest?$is_comp$is_jump?$is_comment?/;
-my $is_lcommand = qr/\(($is_symbol)\)$is_comment?/;
+
+my $is_acommand = qr/
+   \@                         # Starts with @
+   ($is_const|$is_symbol)     # Constant or symbol
+   $is_comment?               # Comment (optional)
+/x;
+
+my $is_ccommand = qr/
+   $is_dest?                  # Destination (optional)
+   $is_comp                   # Computation
+   $is_jump?                  # Jump (optional)
+   $is_comment?               # Comment (optional)
+/x;
+
+my $is_lcommand = qr/
+   \(
+      $is_symbol              # Label name
+   \)
+   $is_comment?               # Comment (optional)
+/x;
 
 
 my $get_symbol = {
@@ -43,6 +60,7 @@ sub new {
 
    my $self = {
       pc => 0,
+      line => 0,
    };
 
    if ($args->{filename}) {
@@ -73,19 +91,24 @@ sub advance {
    my $cmd    = $self->{iter}->() || return;
    my $type   = $self->commandType($cmd);
    my $symbol = $self->symbol($type, $cmd);
+   my $const  = $self->const($type, $cmd);
    my $dest   = $self->dest($type, $cmd);
    my $comp   = $self->comp($type, $cmd);
    my $jump   = $self->jump($type, $cmd);
 
    $self->{pc}++ if ($type == $A_COMMAND || $type == $C_COMMAND);
+   $self->{line}++;
 
    return {
       cmd    => $cmd,
       type   => $type,
       symbol => $symbol,
+      const  => $const,
       dest   => $dest,
       comp   => $comp,
       jump   => $jump,
+      pc     => $self->{pc},
+      line   => $self->{line},
    };
 }
 
@@ -114,6 +137,18 @@ sub symbol {
    my $fun = $get_symbol->{$type} || $get_symbol->{DEFAULT};
 
    return $fun->($cmd);
+}
+
+sub const {
+   my $self = shift;
+   my $type = shift;
+   my $cmd  = shift;
+
+   return unless $type == $A_COMMAND;
+
+   my ($c) = $cmd =~ m/^$is_acommand$/;
+
+   return $c =~ m/^$is_const$/ ? $c : undef;
 }
 
 sub dest {
