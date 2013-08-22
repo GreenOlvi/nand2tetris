@@ -58,23 +58,33 @@ sub new {
    my $class = shift;
    my $args  = shift;
 
-   my $self = {
-      pc => 0,
-      line => 0,
-   };
+   my $self = {};
 
-   if ($args->{filename}) {
-      open(my $fh, '<', $args->{filename});
-      my @lines = <$fh>;
-      chomp @lines;
-      $self->{iter} = _make_iterator(@lines);
-   }
+   open(my $fh, '<', $args->{filename});
+   my @lines = <$fh>;
+   chomp @lines;
 
-   bless $self, $class;
+   $self->{lines} = [@lines];
+
+
+   my $obj = bless $self, $class;
+   $obj->reset;
+
+   return $obj;
+}
+
+sub reset {
+   my $self = shift;
+
+   $self->{pc}   = 0;
+   $self->{line} = 0;
+   $self->{iter} = _make_iterator($self->{lines});
+
+   return;
 }
 
 sub _make_iterator {
-   my @lines = @_;
+   my @lines = @{ shift() };
    return sub {
       local $_;
       while (defined($_ = shift @lines)) {

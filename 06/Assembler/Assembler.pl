@@ -8,17 +8,33 @@ use lib 'lib';
 
 use Parser;
 use Code;
+use SymbolTable;
 
-use Data::Dumper;
 
 my $parser = Parser->new({ filename => $ARGV[0] });
 my $code   = Code->new;
+my $symbol = SymbolTable->new;
+
+while (my $cmd = $parser->advance) {
+   if ($cmd->{type} == $Parser::L_COMMAND && defined $cmd->{symbol}) {
+      $symbol->addEntry($cmd->{symbol}, $cmd->{pc});
+   }
+}
+
+$parser->reset;
 
 while (my $cmd = $parser->advance) {
    if ($cmd->{type} == $Parser::A_COMMAND) {
-      die sprintf("Undefined symbol '%s' in line %d", $cmd->{symbol} || '', $cmd->{line}) unless defined($cmd->{const});
-      my $const = $code->const($cmd->{const});
-      say (0, @$const);
+      my $val;
+      if (defined $cmd->{const}) {
+         $val = $code->const($cmd->{const});
+      } elsif ($symbol->contains($cmd->{symbol})) {
+         $val = $code->const($symbol->getAddress($cmd->{symbol}));
+      } else {
+         $symbol->addEntry($cmd->{symbol});
+         $val = $code->const($symbol->getAddress($cmd->{symbol}));
+      }
+      say (0, @$val);
    } elsif ($cmd->{type} == $Parser::C_COMMAND) {
       my $dest = $code->dest($cmd->{dest});
       my $comp = $code->comp($cmd->{comp});
